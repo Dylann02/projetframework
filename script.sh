@@ -16,7 +16,7 @@ mkdir build
 
 # 3. Compilation du fichier Java
 echo "⚙️ Compilation de FrontControllerServlet.java..."
-javac -cp "lib/*" -d build src/FrontControllerServlet.java
+javac -cp "lib/*" -d build src/controller/FrontControllerServlet.java
 
 # On vérifie si la compilation a réussi
 if [ $? -eq 0 ]; then
