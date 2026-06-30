@@ -1,7 +1,6 @@
 package src.utils;
 
 import java.lang.reflect.Method;
-import java.net.URL;
 
 public class RouteMapping {
     private Method method;

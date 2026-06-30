@@ -2,109 +2,82 @@ package src.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import src.annotation.UrlMapping;
 import src.exception.MethodNotFoundException;
+import src.exception.UrlException;
+import src.utils.MethodHttp;
+import src.utils.RouteMapping;
+import src.utils.UrlMethod;
 import src.utils.Utilitaire;
 
 public class FrontControllerServlet extends HttpServlet {
     private List<Class<?>> listeClassesController;
-    private HashMap<String, Method> listeMethodClass;
+    private HashMap<UrlMethod, RouteMapping> listeMethodClass;
     private String packagee;
 
     @Override
     public void init() {
         try {
-            packagee = "test";
+            packagee = this.getInitParameter("PackageInit");
             listeClassesController = Utilitaire.listeController(packagee);
             listeMethodClass = Utilitaire.listeFunctionController(packagee);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (MethodNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void processRequest(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException, ClassNotFoundException {
-        String url = req.getRequestURI();
-        // String url = req.getContextPath();
+            throws Exception {
+        resp.setContentType("text/plain");
+    
+        String uri = req.getRequestURI();
+        String context = req.getContextPath();
+        String route = uri.substring(context.length());
 
         PrintWriter out = resp.getWriter();
-        for (Class<?> c : listeClassesController) {
-            out.println(c.getName());
-        }
-
-        String[] concat = url.split("/");
-        StringBuilder urlPattern = new StringBuilder();
+        RouteMapping routeMapping = listeMethodClass.get(new UrlMethod(route, MethodHttp.GET));
         
-        if (concat.length >= 2) {
-            for (int i = 2; i < concat.length; i++) {
-                urlPattern.append("/");
-                urlPattern.append(concat[i]);
-            }
-            // out.print(urlPattern);
-            Method method = listeMethodClass.get(urlPattern.toString());
-            
-            if(method != null){
-                out.println("Le package de la method :"+packagee);
-                out.println("Method :"+method.getName());
+        if (routeMapping != null) {
+            Class<?> classe = routeMapping.getClassz();
+            Constructor<?> c = classe.getDeclaredConstructor();
 
-            } else {
-                listeMethodClass.forEach((cle, valeur) -> {
-        
-                    // out.println("Voila la liste des url disponibles :");
-                    out.println(cle + " / " + valeur);
+            out.println("Url :" + route);
+            out.println("Method :" + routeMapping.getMethod().getName());
+            out.println("class :" + routeMapping.getClassz().getSimpleName());
+            Method m = routeMapping.getMethod();
+            m.invoke(c.newInstance());
 
+        } else {
+            out.print("Liste des url disponibles :\n");
+            listeMethodClass.forEach((cle, valeur) -> {
+                out.println("L'url : " + cle.getUrl());
             });
-            }
-                // throw new MethodNotFoundException(listeMethodClass);
-
-
-
-            // listeMethodClass.forEach((cle, valeur) -> {
-            //     try {
-            //         if (cle.equals(urlPattern)) {
-            //             out.println(cle + " / " + valeur);
-            //         } else {
-            //             throw new MethodNotFoundException(listeMethodClass);
-            //         }
-            //     } catch (MethodNotFoundException e) {
-            //         out.println(e.getMessage());
-            //     }
-            // });
         }
 
-
-        // out.println(url);
-        // out.println(urlPattern);
-        // out.println(concat[1]);
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             processRequest(req, resp);
-        } catch (ClassNotFoundException | IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             processRequest(req, resp);
-        } catch (ClassNotFoundException | IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -7,16 +7,22 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+
+import javax.management.RuntimeErrorException;
+
 import src.annotation.Controller;
 import src.annotation.UrlMapping;
 import src.exception.MethodNotFoundException;
+import src.exception.UrlException;
 
 public class Utilitaire {
-    public static List<Class<?>> getClasses(String packageName) throws ClassNotFoundException, MethodNotFoundException, IOException {
+
+    public static List<Class<?>> getClasses(String packageName)
+            throws ClassNotFoundException, MethodNotFoundException, IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String path = packageName.replace('.', '/');
         List<Class<?>> classes = new ArrayList<>();
-        
+
         Enumeration<java.net.URL> resources = classLoader.getResources(path);
         while (resources.hasMoreElements()) {
             java.net.URL resource = resources.nextElement();
@@ -36,33 +42,53 @@ public class Utilitaire {
         return classes;
     }
 
-    public static List<Class<?>> listeController(String packagee) throws ClassNotFoundException, MethodNotFoundException, IOException{
+    public static List<Class<?>> listeController(String packagee)
+            throws ClassNotFoundException, MethodNotFoundException, IOException {
         List<Class<?>> listeClasses = Utilitaire.getClasses(packagee);
         List<Class<?>> listeClassesController = new ArrayList<>();
 
-            for (Class<?> classz : listeClasses) {
-                if (classz.isAnnotationPresent(Controller.class)) {
-                    listeClassesController.add(classz);
-                }
+        for (Class<?> classz : listeClasses) {
+            if (classz.isAnnotationPresent(Controller.class)) {
+                listeClassesController.add(classz);
             }
+        }
         return listeClassesController;
     }
 
-    public static HashMap<String , Method> listeFunctionController(String packagee ) throws ClassNotFoundException, MethodNotFoundException, IOException{
-        HashMap<String , Method> urlFunction = new HashMap<>();
+
+    public static HashMap<UrlMethod, RouteMapping> listeFunctionController(String packagee)
+            throws ClassNotFoundException, MethodNotFoundException, IOException, UrlException {
+
+        HashMap<UrlMethod, RouteMapping> urlFunction = new HashMap<>();
         List<Class<?>> listeClassesController = Utilitaire.listeController(packagee);
 
-        for(Class<?> classz : listeClassesController){
+        for (Class<?> classz : listeClassesController) {
             Method[] listeMethods = classz.getDeclaredMethods();
-            for(Method m : listeMethods){
-                if(m.isAnnotationPresent(UrlMapping.class) ){
+            for (Method m : listeMethods) {
+                if (m.isAnnotationPresent(UrlMapping.class)) {
                     UrlMapping uM = m.getAnnotation(UrlMapping.class);
-                    urlFunction.put(uM.url(), m);
+                    RouteMapping routeMapping = new RouteMapping(m, classz);
+                    UrlMethod urlMethod = new UrlMethod(uM.url(), uM.methodHttp());
+                    System.out.println(urlMethod);
+                    if(urlFunction.containsKey(urlMethod)){
+                        throw new RuntimeException("L'url "+urlMethod.getUrl()+" / "+urlMethod.getMethodHttp()+" est deja present");
+                    } 
+                    urlFunction.put(urlMethod, routeMapping);
                 }
             }
         }
         return urlFunction;
     }
 
-    // public static HashMap<String , >
+    // public static UrlMethod gMethodHttpByUrl(String url, HashMap<UrlMethod, RouteMapping> urlMethodList )
+    //         throws Exception {
+    //     for (UrlMethod key : urlMethodList.keySet()) {
+    //         if (key.getUrl().equals(url)) {
+    //             return key;
+    //         } else {
+    //             throw new Exception();
+    //         }
+    //     }
+    //     return null; 
+    // }
 }
