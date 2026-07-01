@@ -50,7 +50,7 @@ public class FrontControllerServlet extends HttpServlet {
             out.println("Url :" + route);
             out.println("Method :" + routeMapping.getMethod().getName());
             out.println("class :" + routeMapping.getClassz().getSimpleName());
-
+            Utilitaire.inVokeMethod(routeMapping);
         } else {
             out.print("Liste des url disponibles :\n");
             listeMethodClass.forEach((cle, valeur) -> {

@@ -71,7 +71,8 @@ public class Utilitaire {
         }
     }
 
-    public void inVokeMethod(RouteMapping routeMapping) throws NoSuchMethodException{
+    
+    public static void inVokeMethod(RouteMapping routeMapping) throws NoSuchMethodException{
         Class<?> classe = routeMapping.getClassz();
         Constructor<?> c = classe.getDeclaredConstructor();
         Method m = routeMapping.getMethod();
@@ -81,15 +82,4 @@ public class Utilitaire {
             e.printStackTrace();
         }
     }
-    // public static UrlMethod gMethodHttpByUrl(String url, HashMap<UrlMethod, RouteMapping> urlMethodList )
-    //         throws Exception {
-    //     for (UrlMethod key : urlMethodList.keySet()) {
-    //         if (key.getUrl().equals(url)) {
-    //             return key;
-    //         } else {
-    //             throw new Exception();
-    //         }
-    //     }
-    //     return null; 
-    // }
 }
