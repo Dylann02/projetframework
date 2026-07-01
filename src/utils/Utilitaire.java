@@ -40,26 +40,20 @@ public class Utilitaire {
         return classes;
     }
 
-    public static List<Class<?>> listeController(String packagee)
+    public static void listeController(List<Class<?>> listeClassesController,String packagee)
             throws ClassNotFoundException, MethodNotFoundException, IOException {
         List<Class<?>> listeClasses = Utilitaire.getClasses(packagee);
-        List<Class<?>> listeClassesController = new ArrayList<>();
 
         for (Class<?> classz : listeClasses) {
             if (classz.isAnnotationPresent(Controller.class)) {
                 listeClassesController.add(classz);
             }
         }
-        return listeClassesController;
     }
 
 
-    public static HashMap<UrlMethod, RouteMapping> listeFunctionController(String packagee)
+    public static void listeFunctionController(HashMap<UrlMethod, RouteMapping> urlFunction,List<Class<?>> listeClassesController,String packagee)
             throws ClassNotFoundException, MethodNotFoundException, IOException, UrlException {
-
-        HashMap<UrlMethod, RouteMapping> urlFunction = new HashMap<>();
-        List<Class<?>> listeClassesController = Utilitaire.listeController(packagee);
-
         for (Class<?> classz : listeClassesController) {
             Method[] listeMethods = classz.getDeclaredMethods();
             for (Method m : listeMethods) {
@@ -75,7 +69,6 @@ public class Utilitaire {
                 }
             }
         }
-        return urlFunction;
     }
 
     public void inVokeMethod(RouteMapping routeMapping) throws NoSuchMethodException{

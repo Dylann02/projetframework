@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,16 +20,16 @@ import src.utils.UrlMethod;
 import src.utils.Utilitaire;
 
 public class FrontControllerServlet extends HttpServlet {
-    private List<Class<?>> listeClassesController;
-    private HashMap<UrlMethod, RouteMapping> listeMethodClass;
+    private List<Class<?>> listeClassesController = new ArrayList<>();
+    private HashMap<UrlMethod, RouteMapping> listeMethodClass = new HashMap<>();
     private String packagee;
 
     @Override
     public void init() {
         try {
             packagee = this.getInitParameter("PackageInit");
-            listeClassesController = Utilitaire.listeController(packagee);
-            listeMethodClass = Utilitaire.listeFunctionController(packagee);
+            Utilitaire.listeController(listeClassesController,packagee);
+            Utilitaire.listeFunctionController(listeMethodClass,listeClassesController,packagee);
         } catch (Exception e) {
             e.printStackTrace();
         }
