@@ -2,14 +2,12 @@ package src.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.management.RuntimeErrorException;
-
 import src.annotation.Controller;
 import src.annotation.UrlMapping;
 import src.exception.MethodNotFoundException;
@@ -80,6 +78,16 @@ public class Utilitaire {
         return urlFunction;
     }
 
+    public void inVokeMethod(RouteMapping routeMapping) throws NoSuchMethodException{
+        Class<?> classe = routeMapping.getClassz();
+        Constructor<?> c = classe.getDeclaredConstructor();
+        Method m = routeMapping.getMethod();
+        try {
+            m.invoke(c.newInstance());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     // public static UrlMethod gMethodHttpByUrl(String url, HashMap<UrlMethod, RouteMapping> urlMethodList )
     //         throws Exception {
     //     for (UrlMethod key : urlMethodList.keySet()) {

@@ -46,14 +46,9 @@ public class FrontControllerServlet extends HttpServlet {
         RouteMapping routeMapping = listeMethodClass.get(new UrlMethod(route, MethodHttp.GET));
         
         if (routeMapping != null) {
-            Class<?> classe = routeMapping.getClassz();
-            Constructor<?> c = classe.getDeclaredConstructor();
-
             out.println("Url :" + route);
             out.println("Method :" + routeMapping.getMethod().getName());
             out.println("class :" + routeMapping.getClassz().getSimpleName());
-            Method m = routeMapping.getMethod();
-            m.invoke(c.newInstance());
 
         } else {
             out.print("Liste des url disponibles :\n");
