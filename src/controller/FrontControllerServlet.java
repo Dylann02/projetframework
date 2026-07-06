@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import src.annotation.UrlMapping;
@@ -25,13 +26,13 @@ public class FrontControllerServlet extends HttpServlet {
     private String packagee;
 
     @Override
-    public void init() {
+    public void init() throws ServletException {
         try {
             packagee = this.getInitParameter("PackageInit");
             Utilitaire.listeController(listeClassesController,packagee);
             Utilitaire.listeFunctionController(listeMethodClass,listeClassesController,packagee);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new ServletException(e);
         }
     }
 
@@ -50,7 +51,11 @@ public class FrontControllerServlet extends HttpServlet {
             out.println("Url :" + route);
             out.println("Method :" + routeMapping.getMethod().getName());
             out.println("class :" + routeMapping.getClassz().getSimpleName());
-            Utilitaire.inVokeMethod(routeMapping);
+            String output = Utilitaire.inVokeMethod(routeMapping);
+            if (output != null && !output.isEmpty()) {
+                out.println("\nMethod output:");
+                out.print(output);
+            }
         } else {
             out.print("Liste des url disponibles :\n");
             listeMethodClass.forEach((cle, valeur) -> {

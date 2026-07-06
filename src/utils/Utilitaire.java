@@ -1,6 +1,8 @@
 package src.utils;
 
 import java.io.File;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -72,14 +74,20 @@ public class Utilitaire {
     }
 
     
-    public static void inVokeMethod(RouteMapping routeMapping) throws NoSuchMethodException{
+    public static String inVokeMethod(RouteMapping routeMapping) throws Exception{
         Class<?> classe = routeMapping.getClassz();
         Constructor<?> c = classe.getDeclaredConstructor();
         Method m = routeMapping.getMethod();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        PrintStream oldOut = System.out;
         try {
+            System.setOut(ps);
             m.invoke(c.newInstance());
-        } catch (Exception e) {
-            e.printStackTrace();
+        } finally {
+            System.out.flush();
+            System.setOut(oldOut);
         }
+        return baos.toString();
     }
 }
