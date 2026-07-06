@@ -1,7 +1,10 @@
 package src.utils;
 
 import java.io.File;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -10,13 +13,16 @@ import java.util.List;
 import src.annotation.Controller;
 import src.annotation.UrlMapping;
 import src.exception.MethodNotFoundException;
+import src.exception.UrlException;
 
 public class Utilitaire {
-    public static List<Class<?>> getClasses(String packageName) throws ClassNotFoundException, MethodNotFoundException, IOException {
+
+    public static List<Class<?>> getClasses(String packageName)
+            throws ClassNotFoundException, MethodNotFoundException, IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String path = packageName.replace('.', '/');
         List<Class<?>> classes = new ArrayList<>();
-        
+
         Enumeration<java.net.URL> resources = classLoader.getResources(path);
         while (resources.hasMoreElements()) {
             java.net.URL resource = resources.nextElement();
@@ -36,33 +42,52 @@ public class Utilitaire {
         return classes;
     }
 
-    public static List<Class<?>> listeController(String packagee) throws ClassNotFoundException, MethodNotFoundException, IOException{
+    public static void listeController(List<Class<?>> listeClassesController,String packagee)
+            throws ClassNotFoundException, MethodNotFoundException, IOException {
         List<Class<?>> listeClasses = Utilitaire.getClasses(packagee);
-        List<Class<?>> listeClassesController = new ArrayList<>();
 
-            for (Class<?> classz : listeClasses) {
-                if (classz.isAnnotationPresent(Controller.class)) {
-                    listeClassesController.add(classz);
-                }
+        for (Class<?> classz : listeClasses) {
+            if (classz.isAnnotationPresent(Controller.class)) {
+                listeClassesController.add(classz);
             }
-        return listeClassesController;
+        }
     }
 
-    public static HashMap<String , Method> listeFunctionController(String packagee ) throws ClassNotFoundException, MethodNotFoundException, IOException{
-        HashMap<String , Method> urlFunction = new HashMap<>();
-        List<Class<?>> listeClassesController = Utilitaire.listeController(packagee);
 
-        for(Class<?> classz : listeClassesController){
+    public static void listeFunctionController(HashMap<UrlMethod, RouteMapping> urlFunction,List<Class<?>> listeClassesController,String packagee)
+            throws ClassNotFoundException, MethodNotFoundException, IOException, UrlException {
+        for (Class<?> classz : listeClassesController) {
             Method[] listeMethods = classz.getDeclaredMethods();
-            for(Method m : listeMethods){
-                if(m.isAnnotationPresent(UrlMapping.class) ){
+            for (Method m : listeMethods) {
+                if (m.isAnnotationPresent(UrlMapping.class)) {
                     UrlMapping uM = m.getAnnotation(UrlMapping.class);
-                    urlFunction.put(uM.url(), m);
+                    RouteMapping routeMapping = new RouteMapping(m, classz);
+                    UrlMethod urlMethod = new UrlMethod(uM.url(), uM.methodHttp());
+                    System.out.println(urlMethod);
+                    if(urlFunction.containsKey(urlMethod)){
+                        throw new RuntimeException("L'url "+urlMethod.getUrl()+" / "+urlMethod.getMethodHttp()+" est deja present");
+                    } 
+                    urlFunction.put(urlMethod, routeMapping);
                 }
             }
         }
-        return urlFunction;
     }
 
-    // public static HashMap<String , >
+    
+    public static String inVokeMethod(RouteMapping routeMapping) throws Exception{
+        Class<?> classe = routeMapping.getClassz();
+        Constructor<?> c = classe.getDeclaredConstructor();
+        Method m = routeMapping.getMethod();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        PrintStream oldOut = System.out;
+        try {
+            System.setOut(ps);
+            m.invoke(c.newInstance());
+        } finally {
+            System.out.flush();
+            System.setOut(oldOut);
+        }
+        return baos.toString();
+    }
 }
