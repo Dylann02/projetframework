@@ -84,24 +84,5 @@ public class Utilitaire {
         Constructor<?> c = classe.getDeclaredConstructor();
         Method m = routeMapping.getMethod();
         m.invoke(c.newInstance());
-
-        // GlobalVariable variable = new GlobalVariable();
-        // if(o instanceof ModelAndView mv){
-        //     mv.getValue().forEach((key , valeur) -> {
-        //         req.setAttribute(key, o);
-            
-        //     StringBuilder path = new StringBuilder();
-        //     path.append(variable.getPrefix());
-        //     path.append(key);
-        //     path.append(variable.getSuffix());
-            
-        //     RequestDispatcher dispat = req.getRequestDispatcher(path.toString());
-        //     try {
-        //         dispat.forward(req, res);
-        //     } catch (Exception e) {
-        //         e.printStackTrace();
-        //     }
-        //     });
-        // }
     }
 }
