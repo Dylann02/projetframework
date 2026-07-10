@@ -10,6 +10,11 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import src.annotation.Controller;
 import src.annotation.UrlMapping;
 import src.exception.MethodNotFoundException;
@@ -74,20 +79,29 @@ public class Utilitaire {
     }
 
     
-    public static String inVokeMethod(RouteMapping routeMapping) throws Exception{
+    public static void inVokeMethod(RouteMapping routeMapping ,HttpServletRequest req, HttpServletResponse res) throws Exception{
         Class<?> classe = routeMapping.getClassz();
         Constructor<?> c = classe.getDeclaredConstructor();
         Method m = routeMapping.getMethod();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos);
-        PrintStream oldOut = System.out;
-        try {
-            System.setOut(ps);
-            m.invoke(c.newInstance());
-        } finally {
-            System.out.flush();
-            System.setOut(oldOut);
+        Object o =m.invoke(c.newInstance());
+
+        GlobalVariable variable = new GlobalVariable();
+        if(o instanceof ModelAndView mv){
+            mv.getValue().forEach((key , valeur) -> {
+                req.setAttribute(key, o);
+            
+            StringBuilder path = new StringBuilder();
+            path.append(variable.getPrefix());
+            path.append(key);
+            path.append(variable.getSuffix());
+            
+            RequestDispatcher dispat = req.getRequestDispatcher(path.toString());
+            try {
+                dispat.forward(req, res);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            });
         }
-        return baos.toString();
     }
 }

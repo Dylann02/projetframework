@@ -9,12 +9,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import src.annotation.UrlMapping;
 import src.exception.MethodNotFoundException;
 import src.exception.UrlException;
+import src.utils.Dependance;
 import src.utils.MethodHttp;
 import src.utils.RouteMapping;
 import src.utils.UrlMethod;
@@ -23,14 +25,17 @@ import src.utils.Utilitaire;
 public class FrontControllerServlet extends HttpServlet {
     private List<Class<?>> listeClassesController = new ArrayList<>();
     private HashMap<UrlMethod, RouteMapping> listeMethodClass = new HashMap<>();
-    private String packagee;
-
+    private Dependance dependance;
+    
     @Override
     public void init() throws ServletException {
         try {
-            packagee = this.getInitParameter("PackageInit");
-            Utilitaire.listeController(listeClassesController,packagee);
-            Utilitaire.listeFunctionController(listeMethodClass,listeClassesController,packagee);
+            // packagee = this.getInitParameter("PackageInit");
+            // Utilitaire.listeController(listeClassesController,packagee);
+            // Utilitaire.listeFunctionController(listeMethodClass,listeClassesController,packagee);
+            ServletContext context = getServletContext();
+            dependance = (Dependance)context.getAttribute("dependance");
+            
         } catch (Exception e) {
             throw new ServletException(e);
         }
@@ -39,26 +44,22 @@ public class FrontControllerServlet extends HttpServlet {
     public void processRequest(HttpServletRequest req, HttpServletResponse resp)
             throws Exception {
         resp.setContentType("text/plain");
-    
+
         String uri = req.getRequestURI();
         String context = req.getContextPath();
         String route = uri.substring(context.length());
 
         PrintWriter out = resp.getWriter();
-        RouteMapping routeMapping = listeMethodClass.get(new UrlMethod(route, MethodHttp.GET));
-        
+        RouteMapping routeMapping = dependance.getListeMethodClass().get(new UrlMethod(route, MethodHttp.GET));
+
         if (routeMapping != null) {
             out.println("Url :" + route);
             out.println("Method :" + routeMapping.getMethod().getName());
             out.println("class :" + routeMapping.getClassz().getSimpleName());
-            String output = Utilitaire.inVokeMethod(routeMapping);
-            if (output != null && !output.isEmpty()) {
-                out.println("\nMethod output:");
-                out.print(output);
-            }
+            Utilitaire.inVokeMethod(routeMapping ,req,resp);
         } else {
             out.print("Liste des url disponibles :\n");
-            listeMethodClass.forEach((cle, valeur) -> {
+            dependance.getListeMethodClass().forEach((cle, valeur) -> {
                 out.println("L'url : " + cle.getUrl());
             });
         }
