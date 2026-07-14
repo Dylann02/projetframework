@@ -3,6 +3,7 @@ package src.utils;
 import java.io.File;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -79,29 +80,35 @@ public class Utilitaire {
     }
 
     
-    public static void inVokeMethod(RouteMapping routeMapping ,HttpServletRequest req, HttpServletResponse res) throws Exception{
+    public static void inVokeMethod(RouteMapping routeMapping ,HttpServletRequest req, HttpServletResponse res,PrintWriter out) throws Exception{
         Class<?> classe = routeMapping.getClassz();
+        out.println(classe);
         Constructor<?> c = classe.getDeclaredConstructor();
         Method m = routeMapping.getMethod();
-        m.invoke(c.newInstance());
+        out.println(m);
+        Object objet = c.newInstance();
+        Object o =m.invoke(objet);
+        
 
-        // GlobalVariable variable = new GlobalVariable();
-        // if(o instanceof ModelAndView mv){
-        //     mv.getValue().forEach((key , valeur) -> {
-        //         req.setAttribute(key, o);
+        out.println(o);
+        if(o instanceof ModelAndView mv){
+            mv.getValue().forEach((key , valeur) -> {
+                System.out.println(key);
+                System.out.println(valeur.toString());
+                req.setAttribute(key, valeur);
+            StringBuilder path = new StringBuilder();
+            path.append(GlobalVariable.getPrefix());
+            path.append(key);
+            path.append(GlobalVariable.getSuffix());
+            System.out.println(path.toString());
             
-        //     StringBuilder path = new StringBuilder();
-        //     path.append(variable.getPrefix());
-        //     path.append(key);
-        //     path.append(variable.getSuffix());
-            
-        //     RequestDispatcher dispat = req.getRequestDispatcher(path.toString());
-        //     try {
-        //         dispat.forward(req, res);
-        //     } catch (Exception e) {
-        //         e.printStackTrace();
-        //     }
-        //     });
-        // }
+            RequestDispatcher dispat = req.getRequestDispatcher(path.toString());
+            try {
+                dispat.forward(req, res);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            });
+        }
     }
 }
