@@ -19,15 +19,14 @@ public class Listner implements ServletContextListener {
         String prefix = context.getInitParameter("prefix");
         String suffix = context.getInitParameter("suffix");
 
-        GlobalVariable variable = new GlobalVariable();
-        variable.setPrefix(prefix);
-        variable.setSuffix(suffix);
         
+        GlobalVariable.setPrefix(prefix);        
+        GlobalVariable.setSuffix(suffix);
         Dependance dependance = new Dependance();
         try {
             Utilitaire.listeController(dependance.getListeClassesController(),packagee);
             Utilitaire.listeFunctionController(dependance.getListeMethodClass(),dependance.getListeClassesController(),packagee);
-            System.out.println(dependance);
+            // System.out.println(dependance);
             
             context.setAttribute("dependance", dependance);
         } catch (Exception e) {

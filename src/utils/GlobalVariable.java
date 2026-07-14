@@ -1,18 +1,27 @@
 package src.utils;
 
-public class GlobalVariable {
-    private String prefix;
-    private String suffix;
-    public String getPrefix() {
+public  class GlobalVariable {
+    private static String prefix;
+    private static String suffix;
+    public static String getPrefix() {
         return prefix;
     }
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
-    }
-    public String getSuffix() {
+
+    
+   
+    public static String getSuffix() {
         return suffix;
     }
-    public void setSuffix(String suffix) {
-        this.suffix = suffix;
+
+
+
+    public static void setPrefix(String prefix) {
+        GlobalVariable.prefix = prefix;
+    }
+
+
+
+    public static void setSuffix(String suffix) {
+        GlobalVariable.suffix = suffix;
     }
 }

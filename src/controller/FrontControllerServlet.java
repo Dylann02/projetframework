@@ -48,20 +48,20 @@ public class FrontControllerServlet extends HttpServlet {
         String uri = req.getRequestURI();
         String context = req.getContextPath();
         String route = uri.substring(context.length());
-
+            
         PrintWriter out = resp.getWriter();
         RouteMapping routeMapping = dependance.getListeMethodClass().get(new UrlMethod(route, MethodHttp.GET));
-
+        out.println(route);
         if (routeMapping != null) {
-            out.println("Url :" + route);
-            out.println("Method :" + routeMapping.getMethod().getName());
-            out.println("class :" + routeMapping.getClassz().getSimpleName());
-            Utilitaire.inVokeMethod(routeMapping ,req,resp);
-        } else {
-            out.print("Liste des url disponibles :\n");
-            dependance.getListeMethodClass().forEach((cle, valeur) -> {
-                out.println("L'url : " + cle.getUrl());
-            });
+            // out.println("Url :" + route);
+            // out.println("Method :" + routeMapping.getMethod().getName());
+            // out.println("class :" + routeMapping.getClassz().getSimpleName());
+            Utilitaire.inVokeMethod(routeMapping ,req,resp,out);
+        // } else {
+        //     out.print("Liste des url disponibles :\n");
+        //     dependance.getListeMethodClass().forEach((cle, valeur) -> {
+        //         out.println("L'url : " + cle.getUrl());
+        //     });
         }
 
     }
