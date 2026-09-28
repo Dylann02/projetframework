@@ -9,7 +9,8 @@ PROJET_TEST_LIB="/Users/dylan/Documents/App/S5/SPRING/exoFramework/test/lib"
 # 1. Nettoyage des anciens dossiers de build et du jar précédent
 echo "🧹 Nettoyage..."
 rm -rf build
-rm -f framework.jar
+rm -f framework.jar 
+
 
 # 2. Création du dossier temporaire pour les fichiers compilés (.class)
 mkdir build
