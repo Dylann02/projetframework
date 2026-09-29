@@ -98,7 +98,7 @@ public class Utilitaire {
                 req.setAttribute(key, valeur);
             StringBuilder path = new StringBuilder();
             path.append(GlobalVariable.getPrefix());
-            path.append(key);
+            path.append(mv.getView());
             path.append(GlobalVariable.getSuffix());
             System.out.println(path.toString());
             

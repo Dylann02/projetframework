@@ -4,7 +4,7 @@
 # CONFIGURATION
 # Mettez ici le chemin absolu ou relatif vers le dossier 'lib' de votre projet de test
 # ==========================================
-PROJET_TEST_LIB="/Users/dylan/Documents/App/S4/spring/exoFramework/test/lib"
+PROJET_TEST_LIB="/Users/dylan/Documents/App/S5/SPRING/exoFramework/test/lib"
 
 # 1. Nettoyage des anciens dossiers de build et du jar précédent
 echo "🧹 Nettoyage..."
