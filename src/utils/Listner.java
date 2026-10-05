@@ -19,7 +19,6 @@ public class Listner implements ServletContextListener {
         String prefix = context.getInitParameter("prefix");
         String suffix = context.getInitParameter("suffix");
 
-        
         GlobalVariable.setPrefix(prefix);        
         GlobalVariable.setSuffix(suffix);
         Dependance dependance = new Dependance();
@@ -27,7 +26,7 @@ public class Listner implements ServletContextListener {
             Utilitaire.listeController(dependance.getListeClassesController(),packagee);
             Utilitaire.listeFunctionController(dependance.getListeMethodClass(),dependance.getListeClassesController(),packagee);
             // System.out.println(dependance);
-            
+            System.out.println("Routes enregistrées : " + dependance.getListeMethodClass().keySet());
             context.setAttribute("dependance", dependance);
         } catch (Exception e) {
             e.printStackTrace();

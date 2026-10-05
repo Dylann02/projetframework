@@ -6,9 +6,10 @@ public class UrlMethod {
     private String url;
     private MethodHttp methodHttp;
 
-    public UrlMethod(){}
+    public UrlMethod() {}
+
     public UrlMethod(String url, MethodHttp methodHttp) {
-        this.url = url;
+        setUrl(url);
         this.methodHttp = methodHttp;
     }
 
@@ -17,7 +18,12 @@ public class UrlMethod {
     }
 
     public void setUrl(String url) {
-        this.url = url;
+        if (url != null) {
+            // S'assure que l'URL commence toujours par "/"
+            this.url = url.startsWith("/") ? url : "/" + url;
+        } else {
+            this.url = "/";
+        }
     }
 
     public MethodHttp getMethodHttp() {
@@ -29,13 +35,17 @@ public class UrlMethod {
     }
 
     @Override
-    public boolean equals(Object obj){
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        
         UrlMethod urlMethod = (UrlMethod) obj;
-        return url.equals(urlMethod.getUrl())
-                && methodHttp == urlMethod.getMethodHttp();
+        return Objects.equals(url, urlMethod.url) 
+            && methodHttp == urlMethod.methodHttp;
     }
+
     @Override
-    public int hashCode(){
-        return Objects.hash(url,methodHttp);
-    }
+    public int hashCode() {
+        return Objects.hash(url, methodHttp);
+    } 
 }
