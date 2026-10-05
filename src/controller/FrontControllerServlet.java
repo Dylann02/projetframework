@@ -2,20 +2,15 @@ package src.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
+import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import src.annotation.UrlMapping;
-import src.exception.MethodNotFoundException;
-import src.exception.UrlException;
 import src.utils.Dependance;
 import src.utils.MethodHttp;
 import src.utils.RouteMapping;
@@ -43,25 +38,24 @@ public class FrontControllerServlet extends HttpServlet {
 
     public void processRequest(HttpServletRequest req, HttpServletResponse resp)
             throws Exception {
-        resp.setContentType("text/plain");
-
         String uri = req.getRequestURI();
         String context = req.getContextPath();
         String route = uri.substring(context.length());
-            
+
+        MethodHttp methodHttp = MethodHttp.valueOf(req.getMethod().toUpperCase());
         PrintWriter out = resp.getWriter();
-        RouteMapping routeMapping = dependance.getListeMethodClass().get(new UrlMethod(route, MethodHttp.GET));
-        out.println(route);
-        if (routeMapping != null) {
-            // out.println("Url :" + route);
-            // out.println("Method :" + routeMapping.getMethod().getName());
-            // out.println("class :" + routeMapping.getClassz().getSimpleName());
+        RouteMapping routeMapping = dependance.getListeMethodClass()
+                .get(new UrlMethod(route, methodHttp));
+
+        if (routeMapping == null) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Route inconnue : " + route);
+            return;
+        }
+
+        if (routeMapping.isApi()) {
+            Utilitaire.inVokeMethodJson(routeMapping, req, resp);
+        } else  {
             Utilitaire.inVokeMethod(routeMapping ,req,resp,out);
-        // } else {
-        //     out.print("Liste des url disponibles :\n");
-        //     dependance.getListeMethodClass().forEach((cle, valeur) -> {
-        //         out.println("L'url : " + cle.getUrl());
-        //     });
         }
 
     }
@@ -69,6 +63,7 @@ public class FrontControllerServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
+
             processRequest(req, resp);
         } catch (Exception e) {
             e.printStackTrace();
