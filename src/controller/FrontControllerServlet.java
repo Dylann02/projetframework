@@ -52,11 +52,13 @@ public class FrontControllerServlet extends HttpServlet {
         }
 
         if (routeMapping.isApi()) {
+            
             Utilitaire.inVokeMethodJson(routeMapping, req, resp);
+  
         } else  {
+            System.out.println("tonga ato");
             Utilitaire.inVokeMethod(routeMapping ,req,resp,out);
         }
-
     }
 
     @Override
