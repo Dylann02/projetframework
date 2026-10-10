@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class Utilitaire {
             // Décodage du chemin pour gérer les espaces et caractères spéciaux
             String decodedPath = URLDecoder.decode(resource.getFile(), StandardCharsets.UTF_8);
             File directory = new File(decodedPath);
-            
+
             if (directory.exists()) {
                 String[] files = directory.list();
                 if (files != null) {
@@ -79,7 +80,7 @@ public class Utilitaire {
                     UrlMapping uM = m.getAnnotation(UrlMapping.class);
                     RouteMapping routeMapping = new RouteMapping(m, classz);
                     UrlMethod urlMethod = new UrlMethod(uM.url(), uM.methodHttp());
-                    
+
                     if (urlFunction.containsKey(urlMethod)) {
                         throw new RuntimeException("L'url " + urlMethod.getUrl() + " / " + urlMethod.getMethodHttp()
                                 + " est deja presente");
@@ -94,33 +95,64 @@ public class Utilitaire {
         }
     }
 
-    public static void inVokeMethod(RouteMapping routeMapping, HttpServletRequest req, HttpServletResponse res,
-            PrintWriter out) throws Exception {
-        Class<?> classe = routeMapping.getClassz();
-        Constructor<?> c = classe.getDeclaredConstructor();
-        Method m = routeMapping.getMethod();
-        Object objet = c.newInstance();
-        Object o = m.invoke(objet);
+   public static void inVokeMethod(
+        RouteMapping routeMapping,
+        HttpServletRequest req,
+        HttpServletResponse res,
+        PrintWriter out) throws Exception {
 
-        if (o instanceof ModelAndView mv) {
-            // 1. Attribuer toutes les variables à la requête
-            if (mv.getValue() != null) {
-                mv.getValue().forEach(req::setAttribute);
-            }
-            
-            // 2. Effectuer le forward UNE SEULE FOIS après la boucle
-            String viewPath = GlobalVariable.getPrefix() + mv.getView() + GlobalVariable.getSuffix();
-            RequestDispatcher dispat = req.getRequestDispatcher(viewPath);
-            dispat.forward(req, res);
+    Class<?> classe = routeMapping.getClassz();
+    Constructor<?> constructeur = classe.getDeclaredConstructor();
+    Method methode = routeMapping.getMethod();
+    Object objet = constructeur.newInstance();
+
+    Parameter[] parametres = methode.getParameters();
+    Object[] args = new Object[parametres.length];
+
+    for (int i = 0; i < parametres.length; i++) {
+        String parameterName = parametres[i].getName();
+        String value = req.getParameter(parameterName);
+        Class<?> type = parametres[i].getType();
+
+        if (value == null) {
+            throw new IllegalArgumentException(
+                    "Paramètre manquant : " + parameterName);
+        }
+
+        if (type == Integer.class || type == int.class) {
+            args[i] = Integer.parseInt(value);
+        } else if (type == Double.class || type == double.class) {
+            args[i] = Double.parseDouble(value);
+        } else if (type == String.class) {
+            args[i] = value;
+        } else {
+            throw new IllegalArgumentException(
+                    "Type de paramètre non supporté : " + type.getName());
         }
     }
+
+    Object result = methode.invoke(objet, args);
+
+    if (result instanceof ModelAndView mv) {
+        if (mv.getValue() != null) {
+            mv.getValue().forEach(req::setAttribute);
+        }
+
+        String viewPath = GlobalVariable.getPrefix()
+                + mv.getView()
+                + GlobalVariable.getSuffix();
+
+        RequestDispatcher dispatcher = req.getRequestDispatcher(viewPath);
+        dispatcher.forward(req, res);
+    }
+}
 
     public static void inVokeMethodJson(RouteMapping routeMapping, HttpServletRequest req, HttpServletResponse res)
             throws NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, IOException, ServletException {
         res.setContentType("application/json");
         res.setCharacterEncoding("UTF-8");
-        
+
         Class<?> classe = routeMapping.getClassz();
         Constructor<?> c = classe.getDeclaredConstructor();
         Method m = routeMapping.getMethod();
