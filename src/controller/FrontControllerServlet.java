@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -20,7 +22,7 @@ public class FrontControllerServlet extends HttpServlet {
     private List<Class<?>> listeClassesController = new ArrayList<>();
     private HashMap<UrlMethod, RouteMapping> listeMethodClass = new HashMap<>();
     private Dependance dependance;
-    
+
     @Override
     public void init() throws ServletException {
         try {
@@ -28,8 +30,8 @@ public class FrontControllerServlet extends HttpServlet {
             // Utilitaire.listeController(listeClassesController,packagee);
             // Utilitaire.listeFunctionController(listeMethodClass,listeClassesController,packagee);
             ServletContext context = getServletContext();
-            dependance = (Dependance)context.getAttribute("dependance");
-            
+            dependance = (Dependance) context.getAttribute("dependance");
+
         } catch (Exception e) {
             throw new ServletException(e);
         }
@@ -47,17 +49,21 @@ public class FrontControllerServlet extends HttpServlet {
                 .get(new UrlMethod(route, methodHttp));
 
         if (routeMapping == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Route inconnue : " + route);
-            return;
+            out.write("Voici les liste des url disponible : ");
+            dependance.getListeMethodClass().forEach((cle, valeur) -> {
+                
+                out.write(" URL : "+cle.getUrl());
+            });
+
         }
 
         if (routeMapping.isApi()) {
-            
+
             Utilitaire.inVokeMethodJson(routeMapping, req, resp);
-  
-        } else  {
+
+        } else {
             System.out.println("tonga ato");
-            Utilitaire.inVokeMethod(routeMapping ,req,resp,out);
+            Utilitaire.inVokeMethod(routeMapping, req, resp, out);
         }
     }
 
