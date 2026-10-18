@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import src.utils.Dependance;
@@ -18,6 +18,7 @@ import src.utils.RouteMapping;
 import src.utils.UrlMethod;
 import src.utils.Utilitaire;
 
+@MultipartConfig
 public class FrontControllerServlet extends HttpServlet {
     private List<Class<?>> listeClassesController = new ArrayList<>();
     private HashMap<UrlMethod, RouteMapping> listeMethodClass = new HashMap<>();
